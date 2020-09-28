@@ -1,0 +1,102 @@
+.main{
+    background-color: #eee;
+    font-weight: 600;
+    h1{
+        font-size:18px;
+    }
+    .footer{
+        padding: 20px;
+        text-align: center;
+    }
+}
+.container {
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    padding: 1%;
+    .shuttleCotainer{
+        display: grid;
+        grid-template-columns:repeat(4,1fr);
+    }
+    .filters{
+        background-color: #fff;
+        height:auto;
+        padding: 2%;
+        border: 1px solid white;
+        border-radius: 6px;
+        .filterTitle{
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .launchYear{
+            text-align: center;
+            p{
+                margin-top: 0;
+            }
+        }
+        .yearContainer{
+            padding: 0 10% 10% 10%;
+            display: grid;
+            grid-template-columns:repeat(2,1fr);
+            align-items: center;
+            .years{
+                padding: 6px 0px;
+                button{
+                    background-color: #a0b580;
+                    width: 75%;
+                    border: 1px solid white;
+                    border-radius: 7px;
+                    height: 26px;
+                    text-transform:capitalize;
+                    &.activeIndex{
+                        background-color:#759a3c;
+                    }
+                }
+            }
+        }
+    }
+
+    .list{
+        border:1px solid white;
+        padding: 7%;
+        background-color: white;
+        margin:0 10px 10px 10px;
+        border-radius: 6px;
+        p {
+            margin:5px;
+            color:#9999d8;
+            span{
+                color:#000
+            }
+        }
+        ul{
+            margin: 5px;
+        }
+    }
+    .imageClass{
+        background-color: #eee;
+        height:200px;
+        margin-bottom:10px ;
+    }
+}
+
+
+
+@media only screen and (max-width: 700px) {
+    .container {
+        grid-template-columns:repeat(1,1fr);
+    .shuttleCotainer{
+        grid-template-columns:repeat(1,1fr);
+        .list{
+            margin: 10px 0 ;
+        }
+    }
+    }
+  }
+  @media screen and (max-width: 1024px) and (min-width: 700px) {
+    .container {
+        grid-template-columns:1fr 3fr;
+    .shuttleCotainer{
+        grid-template-columns:1fr 1fr;
+    }
+    }
+  }

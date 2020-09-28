@@ -1,0 +1,59 @@
+<div class="main">
+  <h1>SpaceX launch programs</h1>
+<div class="container">
+  <div class="filters">
+    Filters
+    <div class="launchYear">
+      <p><strong><span class="filterTitle">    Launch Year   </span></strong></p>
+      <!-- <year></year> -->
+      <div class="yearContainer">
+        <div class="years" *ngFor="let year of years;let i=index">
+          <button (click)="filterByYear(year,i)" [ngClass]="{'activeIndex' : i==activeIndex}">{{year}} </button>
+
+        </div>
+      </div>
+    </div>
+    <div class="launchYear">
+      <p><strong><span class="filterTitle">    Successful Launching   </span></strong></p>
+      <!-- <year></year> -->
+      <div class="yearContainer">
+        <div class="years" *ngFor="let launch of ['true', 'false'];let i=index">
+          <button (click)="filterByLaunch(launch,i)" [ngClass]="{'activeIndex' : i==activeLaunch}">{{launch}} </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="launchYear">
+      <p><strong><span class="filterTitle">    Successful Landing   </span></strong></p>
+      <!-- <year></year> -->
+      <div class="yearContainer">
+        <div class="years" *ngFor="let land of ['true', 'false'];let i=index">
+          <button (click)="filterByLand(land,i)" [ngClass]="{'activeIndex' : i==activeLanding}">{{land }} </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="shuttles">
+    <div class="shuttleCotainer">
+      <div *ngFor="let datum of displayData" class="list">
+        <div class="imageClass"><img /></div>
+        <p>
+          <strong><span>Mission Ids:</span></strong></p>
+          <ul>
+            <li *ngFor="let id of datum.mission_id"><p>{{id}}</p></li>
+            <li *ngIf="datum.mission_id.length==0"><p>Not available</p></li>
+          </ul>
+        <p><strong><span> Launch Year :</span></strong> {{datum.launch_year}}</p>
+        <p><strong><span>Successful Launch :</span></strong> {{datum.launch_success}}</p>
+        <p><strong><span>Successful Landing :</span></strong> {{datum.land_success ? datum.land_success : 'Na' }}</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="footer">
+Developed by Jaya kumar Dhanaraj
+</div>
+
+</div>
