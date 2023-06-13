@@ -1,0 +1,136 @@
+// actions.ts
+import { put, takeEvery } from 'redux-saga/effects';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  UPLOAD_FILES,
+  UPLOAD_SUCCESS,
+  UPLOAD_FAILURE,
+  UPLOAD_PROGRESS,
+} from './actionTypes';
+
+interface FileUploadAction {
+  type: string;
+  fileId?: string;
+  progress?: number;
+  response?: any;
+  error?: Error;
+}
+
+export const uploadFiles = (files: File[]) => {
+  return {
+    type: UPLOAD_FILES,
+    payload: { files },
+  };
+};
+
+function* uploadFileSaga(action: FileUploadAction) {
+  const { file, fileId } = action.payload;
+
+  try {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      throw new Error(`File size exceeds the maximum limit of ${maxSize} bytes.`);
+    }
+
+    const allowedFormats = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!allowedFormats.includes(file.type)) {
+      throw new Error('Invalid file format. Only JPEG, PNG, and GIF files are allowed.');
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    yield put({ type: UPLOAD_PROGRESS, fileId, progress: 0 });
+
+    const response = yield call(uploadFileToApi, formData, fileId);
+
+    yield put({ type: UPLOAD_SUCCESS, fileId, response });
+  } catch (error) {
+    yield put({ type: UPLOAD_FAILURE, fileId, error });
+  }
+}
+
+function* uploadFilesSaga(action: FileUploadAction) {
+  const { files } = action.payload;
+
+  try {
+    const fileUploadPromises = files.map((file: File) => {
+      const fileId = uuidv4();
+      return put(uploadFile(file, fileId));
+    });
+
+    yield all(fileUploadPromises);
+  } catch (error) {
+    yield put({ type: UPLOAD_FAILURE, error });
+  }
+}
+
+export function* watchUploadFiles() {
+  yield takeEvery(UPLOAD_FILES, uploadFilesSaga);
+}
+
+function uploadFileToApi(formData: FormData, fileId: string) {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker('/path/to/upload-worker.js');
+
+    worker.onmessage = (event) => {
+      const { type, fileId, progress, response, error } = event.data;
+
+      switch (type) {
+        case UPLOAD_PROGRESS:
+          put({ type, fileId, progress });
+          break;
+        case UPLOAD_SUCCESS:
+          put({ type, fileId, response });
+          resolve();
+          break;
+        case UPLOAD_FAILURE:
+          put({ type, fileId, error });
+          reject(error);
+          break;
+        default:
+          break;
+      }
+    };
+
+    worker.postMessage({ formData, fileId });
+  });
+}
+
+
+
+// upload-worker.js
+self.addEventListener('message', async (event) => {
+  const { file, fileId } = event.data;
+
+  try {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      throw new Error(`File size exceeds the maximum limit of ${maxSize} bytes.`);
+    }
+
+    const allowedFormats = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!allowedFormats.includes(file.type)) {
+      throw new Error('Invalid file format. Only JPEG, PNG, and GIF files are allowed.');
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    self.postMessage({ type: UPLOAD_PROGRESS, fileId, progress: 0 });
+
+    const response = await axios.post('/api/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (progressEvent) => {
+        const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+        self.postMessage({ type: UPLOAD_PROGRESS, fileId, progress });
+      },
+    });
+
+    self.postMessage({ type: UPLOAD_SUCCESS, fileId, response });
+  } catch (error) {
+    self.postMessage({ type: UPLOAD_FAILURE, fileId, error });
+  }
+});
